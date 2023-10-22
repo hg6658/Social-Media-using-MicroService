@@ -1,25 +1,33 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+import Postform from './createPost';
+import Post from './post';
+import {useState, useEffect} from 'react';
+import axios from 'axios';
+const App = () =>{
+  let [posts,setPosts] = useState({});
+  useEffect(() =>{
+    async function fetchData(){
+    let allposts =  await axios.get('http://localhost:4000/posts');
+    allposts = allposts?.data;
+    for(let key of Object.keys(allposts)){
+      let comments = await axios.get(`http://localhost:4001/posts/${key}/comments`);
+      allposts[key].comments = comments; 
+    }
+    console.log(allposts);
+    setPosts(allposts);
+    }
+    fetchData();
+  },[]);
+  return <div className = "home">
+    <h1 className='heading'>Tweet App</h1>
+    <Postform />
+    {
+      Object.keys(posts).map(post =>{
+        return <Post post={posts[post]}/>
+      })
+    }
     </div>
-  );
 }
 
 export default App;
